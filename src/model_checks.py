@@ -41,4 +41,4 @@ def should_promote(
     """
     if champion_accuracy is None:
         return challenger_accuracy >= threshold
-    return challenger_accuracy >= champion_accuracy
+    return challenger_accuracy > champion_accuracy
