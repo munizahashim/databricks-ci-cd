@@ -78,3 +78,4 @@ test_df = pd.concat([X_test.reset_index(drop=True), y_test.reset_index(drop=True
 spark.createDataFrame(test_df).write.format("delta").mode("overwrite").saveAsTable(
     f"{catalog_name}.{schema_name}.wine_test"
 )
+# Wine quality classifier — RandomForest baseline
