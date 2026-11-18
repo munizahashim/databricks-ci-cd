@@ -1,0 +1,59 @@
+name: Dev Deployment Workflow
+
+# Runs when a PR targeting develop is opened or updated.
+# Deploys the bundle to the dev workspace. No approval gate: the GitHub
+# "dev" environment has no required reviewers.
+#
+# The MLOps pipeline (train, validate, deploy, batch inference) is defined as tasks
+# inside the Databricks Job in the bundle. CD deploys the job definition; it does
+# not run the job.
+on:
+  pull_request:
+    branches:
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false  
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    environment: dev  # Auto-deploys — no approval gate
+
+    # Required for Databricks GitHub OIDC — GitHub issues an OIDC token that the
+    # Databricks CLI exchanges for a short-lived access token automatically.
+    # No client secret is stored or needed.
+
+
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_AUTH_TYPE: oauth-m2m
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Deploy bundle to dev
+        run: databricks bundle deploy --target dev

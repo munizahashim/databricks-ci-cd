@@ -1,0 +1,11 @@
+# Libraries the unit tests import
+mlflow
+scikit-learn
+pandas
+numpy
+
+# CI: unit tests
+pytest
+
+# CI: security scan
+bandit

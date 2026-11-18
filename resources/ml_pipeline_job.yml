@@ -1,0 +1,38 @@
+resources:
+  jobs:
+    wine_quality_ml_pipeline:
+      name: wine-quality-ml-pipeline
+
+      tasks:
+        - task_key: train_task
+          notebook_task:
+            notebook_path: ../src/train.py
+
+        - task_key: validate_task
+          notebook_task:
+            notebook_path: ../src/validate.py
+            base_parameters:
+              # Task value set by train_task with dbutils.jobs.taskValues.set
+              model_version: "{{tasks.train_task.values.model_version}}"
+          depends_on:
+            - task_key: train_task
+
+        - task_key: deploy_task
+          notebook_task:
+            notebook_path: ../src/deploy.py
+          depends_on:
+            - task_key: validate_task
+
+        - task_key: batch_inference_task
+          notebook_task:
+            notebook_path: ../src/batch_inference.py
+          depends_on:
+            - task_key: deploy_task
+
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog_name}
+        - name: schema_name
+          default: ${var.schema_name}
+        - name: model_name
+          default: ${var.catalog_name}.${var.schema_name}.wine_classifier

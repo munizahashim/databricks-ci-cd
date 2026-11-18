@@ -1,0 +1,39 @@
+bundle:
+  name: "databricks-ci-cd"
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+variables:
+    catalog_name:
+      description: Target catalog for this deployment
+      default: cavallo_${bundle.target}
+    schema_name:
+      description: Schema for ML artifacts
+      default: data_science
+    
+targets:
+  # dev sets no host. The CLI takes the workspace from your login profile when you
+  # run it locally (databricks auth login --host <workspace-url>), and from
+  # DATABRICKS_HOST in the GitHub "dev" environment when CI runs it.
+  dev:
+    mode: development
+    default: true
+
+  # test and prod pin their workspace, so these targets always deploy to the same one.
+  # Replace each placeholder with that workspace's URL — the same value as
+  # DATABRICKS_HOST in the matching GitHub environment.
+  # Find the URL: your browser's address bar when signed in to the workspace, or
+  # in the Azure portal, the URL field on the Azure Databricks resource.
+  test:
+    mode: production
+    workspace:
+      host: https://dbc-edeb68e3-629e.cloud.databricks.com
+
+
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-edeb68e3-629e.cloud.databricks.com
+
