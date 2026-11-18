@@ -9,8 +9,8 @@ name: Prod Deployment Workflow
 # not run the job.
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
 
 concurrency:
   group: ${{ github.workflow }}
